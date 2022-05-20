@@ -1,29 +1,23 @@
 import React, {useState, useEffect} from "react";
 import Recipes from "../../component/recipes/recipes";
 import {Col, Row, Container} from "react-bootstrap";
-import "./home.scss";
-import axios from "axios";
+import {getAllRecipe} from '../../api/api';
 
-function Home() {
+const Home = () => {
 
     const [recipes, setRecipes] = useState();
 
-    const loadRecipes = async() => {
-        await axios
-            .get('/recipes')
-            .then(response => {
-                setRecipes(response.data);
-            })
-
-    }
     useEffect(() => {
-        loadRecipes();
+        getAllRecipe()
+        .then(response => {
+            setRecipes(response);
+        })
     }, []);
 
     const recipeList = recipes
         ? recipes.map((recipe) => {
             return (
-                <Col className="col-md-4" key={recipe.uuid}>
+                <Col md={4} key={recipe.uuid}>
                     <Recipes
                         title={recipe.title}
                         description={recipe.description}
@@ -37,8 +31,8 @@ function Home() {
         </Col>
     return (
 
-        <Container className="home">
-            <h2>Recipe List</h2>
+        <Container>
+            <h2 className="mt-4 mb-4">Recipe List</h2>
             <Row>{recipeList}</Row>
         </Container>
     );
