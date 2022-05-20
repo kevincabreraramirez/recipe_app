@@ -1,10 +1,11 @@
 import React, {useState, useEffect} from "react";
 import {Link} from "react-router-dom";
 import withRouter from "../../component/withrouter/withrouter";
+import {Col, Row, Container} from "react-bootstrap";
 import "./recipe.scss";
-import axios from "axios";
+import {getRecipe, getSpecial} from '../../api/api';
 
-function Recipe(props) {
+const Recipe = (props) => {
 
     const [recipe, setRecipe] = useState([]);
     const [specials, setSpecials] = useState([]);
@@ -13,23 +14,16 @@ function Recipe(props) {
     const [directions, setDirections] = useState([]);
     const recipeID = props.params.id;
 
-    const loadRecipe = async() => {
-        await axios
-            .get(`/recipes/${recipeID}`)
-            .then(response => {
-                setRecipe(response.data);
-                setBanner(response.data.images.full);
-                setIngredients(response.data.ingredients);
-                setDirections(response.data.directions);
-            });
-        await axios
-            .get(`/specials`)
-            .then(response => {
-                setSpecials(response.data);
-            });
-    }
     useEffect(() => {
-        loadRecipe();
+        getRecipe(recipeID).then(response => {
+            setRecipe(response);
+            setBanner(response.images.full);
+            setIngredients(response.ingredients);
+            setDirections(response.directions);
+        });
+        getSpecial().then(response => {
+            setSpecials(response);
+        });
     }, []);
 
     const loadIngredients = ingredients.map(ingredient => {
@@ -50,7 +44,7 @@ function Recipe(props) {
                 <li>{ingredient.name}</li>
                 {loadSpecials}
             </ul>
-        )
+        );
     });
     const loadDirections = directions.map(direction => {
         return (
@@ -58,37 +52,41 @@ function Recipe(props) {
                 <li>{direction.instructions}</li>
             </ul>
         );
-    })
+    });
     return (
         <div id="ingredients">
-            <p>
+            <p className="mt-4">
                 <Link to={-1} className="btn btn-primary">
                     Back
                 </Link>
             </p>
-            <p>
-                <img src={`http://localhost:3001${banner}`} alt="" width="1000"/>
-            </p>
-            <h2>{recipe.title}</h2>
-            <p>{recipe.description}</p>
-            <p>Cooking Time: {recipe.cookTime}</p>
-            <p>Servings: {recipe.servings}</p>
-
-            <div className="container">
-                <div className="row">
-                    <div className="col">
+            <Container>
+                <Row>
+                    <Col sm={4}>
+                        <h2>{recipe.title}</h2>
+                        <p>{recipe.description}</p>
+                        <p>Cooking Time: {recipe.cookTime}</p>
+                        <p>Servings: {recipe.servings}</p>
+                    </Col>
+                    <Col sm={8}>
+                        <p>
+                            <img src={`http://localhost:3001${banner}`} alt="" width="100%"/>
+                        </p>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
                         <h3>Ingredients</h3>
                         {loadIngredients}
-                    </div>
-                    <div className="col">
+                    </Col>
+                    <Col>
                         <h3>Directions</h3>
                         {loadDirections}
-                    </div>
-                </div>
-            </div>
+                    </Col>
+                </Row>
+            </Container>
         </div>
     );
-    // }
 }
 
 export default withRouter(Recipe);
